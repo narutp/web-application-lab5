@@ -1,8 +1,17 @@
 <?php
+
+// Import PHPMailer classes into the global namespace
+// These must be at the top of your script, not inside a function
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+        
+//Load Composer's autoloader
+require 'vendor/autoload.php';
 $servername = "localhost";
 $username = "narut";
 $password = "1234";
 $dbname = "dreamhomedb";
+$address = $_POST["email"];
 
 try {
     $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
@@ -59,6 +68,33 @@ catch(PDOException $e)
         <?php $staffNameLabel = '<br>' . '<b>' . 'Staff name: ' . '</b>'?>
         <?php $clientNameLabel = '<br>' . '<br>' . '<b>' . 'Client name: ' . '</b>'?>
         <?php
+        if (isset($_POST["sendMail"]) AND isset($_POST["email"])) {
+            $mail = new PHPMailer(true);                              // Passing `true` enables exceptions
+            try {
+                //Server settings
+                $mail->isSMTP();                                      // Set mailer to use SMTP
+                $mail->Host = '	smtp.sendgrid.net';  // Specify main and backup SMTP servers
+                $mail->SMTPAuth = true;                               // Enable SMTP authentication
+                $mail->Username = 'apikey';                 // SMTP username
+                $mail->Password = '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';                           // SMTP password
+                $mail->SMTPSecure = 'tls';                            // Enable TLS encryption, `ssl` also accepted
+                $mail->Port = 587;                                    // TCP port to connect to
+            
+                //Recipients
+                $mail->setFrom('narut.p@ku.th', 'Narut Poovorakit');
+                $mail->addAddress($address);
+                
+                //Content
+                $mail->isHTML(true);                                  // Set email format to HTML
+                $mail->Subject = 'Dream Home';
+                $mail->Body    = 'This is the message from dream home</b>';
+            
+                $mail->send();
+                echo 'Message has been sent';
+            } catch (Exception $e) {
+                echo 'Message could not be sent. Mailer Error: ', $mail->ErrorInfo;
+            }
+        }
             if (isset($_POST['propertySelected'])) {
                 $propertyResult = $_POST['propertySelected'];
                 $clientQuery = $conn->prepare("SELECT clientno,viewdate FROM viewing WHERE propertyno=?");
@@ -82,6 +118,14 @@ catch(PDOException $e)
                 };
 
                 //client no
+                if (sizeof($clientno) == 0) {
+                    echo '<form method="post" id="form" action="index.php">
+                    <div>
+                        Enter your email: <input type="text" name="email"><br>
+                    </div>
+                    <button type="submit" name="sendMail">Send mail</button>
+                    </form>';
+                }
                 $clientArr = [];
                 $viewdateArr = [];
                 foreach($clientno as $client) {
