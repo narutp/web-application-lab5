@@ -57,6 +57,7 @@ catch(PDOException $e)
         <?php $clientLabel = '<b>' . 'Client number: ' . '</b>'?>
         <?php $viewDateLabel = '<b>' . 'View date: ' . '</b>'?>
         <?php $staffNameLabel = '<br>' . '<b>' . 'Staff name: ' . '</b>'?>
+        <?php $clientNameLabel = '<br>' . '<br>' . '<b>' . 'Client name: ' . '</b>'?>
         <?php
             if (isset($_POST['propertySelected'])) {
                 $propertyResult = $_POST['propertySelected'];
@@ -69,27 +70,9 @@ catch(PDOException $e)
                 $staffQuery->execute(array($propertyResult));
                 $staffName = $staffQuery->fetchAll();
 
-                $clientNameQuery = $conn->prepare("SELECT fname,lname FROM Client WHERE clientno=?");
-                $clientFNameArr = [];
-                $clientLNameArr = [];
-                foreach($clientno as $client) {
-                    $clientNameQuery->execute(array($client[0]));
-                    $clientName = $clientNameQuery->fetchAll();
-                    
-                    //client name
-                    foreach($clientName as $cn) {
-                        $clientFNameArr = $cn[0];
-                        $clientLNameArr = $cn[1];
-                        echo $clientFNameArr;
-                        echo $clientLNameArr;
-                    };
-                }
-                
-                $clientArr = [];
-                $viewdateArr = [];
+                //staff name
                 $staffFNameArr = [];
                 $staffLNameArr = [];
-                //staff name
                 foreach($staffName as $staff) {
                     $staffFNameArr = $staff[0];
                     $staffLNameArr = $staff[1];
@@ -99,6 +82,8 @@ catch(PDOException $e)
                 };
 
                 //client no
+                $clientArr = [];
+                $viewdateArr = [];
                 foreach($clientno as $client) {
                     $clientArr = $client[0] . ' | ';
                     $viewdateArr = $client[1];
@@ -109,8 +94,27 @@ catch(PDOException $e)
                     echo $viewdateArr;
                 };
 
+                //client name
+                $clientNameQuery = $conn->prepare("SELECT fname,lname FROM Client WHERE clientno=?");
+                $clientFNameArr = [];
+                $clientLNameArr = [];
+                echo $clientNameLabel;
+                foreach($clientno as $client) {
+                    $clientNameQuery->execute(array($client[0]));
+                    $clientName = $clientNameQuery->fetchAll();
+                    
+                    foreach($clientName as $cn) {
+                        $clientFNameArr = $cn[0];
+                        $clientLNameArr = $cn[1];
+                        echo $clientFNameArr;
+                        echo $clientLNameArr . '<br>';
+                    };
+                }
+
+                $result = 'hello eiei';
             }
         ?>
+        <button style="background-color: green; color: white" class="button primary" onClick="print()">Export to PDF</button>
     </div>
 </body>
 <style>
